@@ -1,0 +1,144 @@
+##########################################
+# Hitachi Content Platform Prometheus exporter
+##########################################
+# Port run exporter
+port: 8000
+
+# Host run in exporter
+host: 0.0.0.0
+
+# Enable debug logging for exporter
+debug: true
+
+# Default: /var/log/hitachi_content_platform.log
+log_file: "/home/kien/hitachi_content_platform.log"
+
+# Hitachi Content Platform API destination
+base_url: "https://10.1.22.163:9090"
+
+# Declare the api endpoints need to be access
+endpoints:
+  api1: "/mapi/nodes/statistics"
+  api2: "/mapi/tenants/<tentant-user>"
+  api3: "/mapi/tenants/<tentant-user>/statistics"
+  api4: "/mapi/services/statistics"
+
+# Declare the Authorization
+Authorization: "HCP YWRtaW4=:0e7517141fb53f21ee439b355b5a1d0a"
+
+# Declare the metrics need to be collect in variable metrics
+metrics:
+  - metric_name: "cpu_user"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/cpuUser"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+  - metric_name: "cpu_system"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/cpuSystem"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+  - metric_name: "cpu_max"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/cpuMax"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+  - metric_name: "io_wait"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/ioWait"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+  - metric_name: "swap_out"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/swapOut"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+  - metric_name: "block_read"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/volumes/volume/blocksRead"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+      - label_name: "volume_id"
+        label_path: "ancestor::volume/id"
+  - metric_name: "block_written"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/volumes/volume/blocksWritten"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+      - label_name: "volume_id"
+        label_path: "ancestor::volume/id"
+  - metric_name: "disk_utilization"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/volumes/volume/diskUtilization"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+      - label_name: "volume_id"
+        label_path: "ancestor::volume/id"
+  - metric_name: "transfer_speed"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/volumes/volume/transferSpeed"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+      - label_name: "volume_id"
+        label_path: "ancestor::volume/id"
+  - metric_name: "total_bytes"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/volumes/volume/totalBytes"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+      - label_name: "volume_id"
+        label_path: "ancestor::volume/id"
+  - metric_name: "free_bytes"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/volumes/volume/freeBytes"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+      - label_name: "volume_id"
+        label_path: "ancestor::volume/id"
+  - metric_name: "max_front_end_bandwidth"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/maxFrontEndBandwidth"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+  - metric_name: "front_end_bytes_read"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/frontEndBytesRead"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+  - metric_name: "front_end_bytes_written"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/frontEndBytesWritten"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+  - metric_name: "max_back_end_bandwidth"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/maxBackEndBandwidth"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+  - metric_name: "back_end_bytes_read"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/backEndBytesRead"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
+  - metric_name: "back_end_bytes_written"
+    api_endpoint: api1
+    metric_path: "/nodeStatistics/nodes/node/backEndBytesWritten"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/backendIpAddress"
