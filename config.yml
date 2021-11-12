@@ -19,8 +19,8 @@ base_url: "https://10.1.22.163:9090"
 # Declare the api endpoints need to be access
 endpoints:
   api1: "/mapi/nodes/statistics"
-  api2: "/mapi/tenants/<tentant-user>"
-  api3: "/mapi/tenants/<tentant-user>/statistics"
+  api2: "/mapi/tenants/<tenant-user>"
+  api3: "/mapi/tenants/<tenant-user>/statistics"
   api4: "/mapi/services/statistics"
 
 # Declare the Authorization
@@ -142,3 +142,129 @@ metrics:
     labels:
       - label_name: "node"
         label_path: "ancestor::node/backendIpAddress"
+  - metric_name: "soft_quota"
+    api_endpoint: api2
+    metric_path: "/tenant/softQuota"
+    labels: []
+  # - metric_name: "soft_quota"
+  #   api_endpoint: api2
+  #   metric_path: "/tenant/softQuota"
+  #   labels:
+  #     - label_name: "name"
+  #       label_path: "ancestor::tenant/name"
+  - metric_name: "hard_quota"
+    api_endpoint: api2
+    metric_path: "/tenant/hardQuota"
+    labels: []
+  - metric_name: "namespace_quota"
+    api_endpoint: api2
+    metric_path: "/tenant/namespaceQuota"
+    labels: []
+  - metric_name: "compressed_count"
+    api_endpoint: api3
+    metric_path: "/statistics/compressedCount"
+    labels: []
+  - metric_name: "compressed_saved_size"
+    api_endpoint: api3
+    metric_path: "/statistics/compressedSavedSize"
+    labels: []
+  - metric_name: "custom_metadata_count"
+    api_endpoint: api3
+    metric_path: "/statistics/customMetadataCount"
+    labels: []
+  - metric_name: "custom_metadata_size"
+    api_endpoint: api3
+    metric_path: "/statistics/customMetadataSize"
+    labels: []
+  - metric_name: "erasure_coded_count"
+    api_endpoint: api3
+    metric_path: "/statistics/erasureCodedCount"
+    labels: []
+  - metric_name: "erasure_coded_size"
+    api_endpoint: api3
+    metric_path: "/statistics/erasureCodedSize"
+    labels: []
+  - metric_name: "ingested_volume"
+    api_endpoint: api3
+    metric_path: "/statistics/ingestedVolume"
+    labels: []
+  - metric_name: "object_count"
+    api_endpoint: api3
+    metric_path: "/statistics/objectCount"
+    labels: []
+  - metric_name: "shred_count"
+    api_endpoint: api3
+    metric_path: "/statistics/shredCount"
+    labels: []
+  - metric_name: "shred_size"
+    api_endpoint: api3
+    metric_path: "/statistics/shredSize"
+    labels: []
+  - metric_name: "storage_capacity_used"
+    api_endpoint: api3
+    metric_path: "/statistics/storageCapacityUsed"
+    labels: []
+  - metric_name: "start_time"
+    api_endpoint: api4
+    metric_path: "/serviceStatistics/nodes/node/services/service/startTime"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/ipAddress"
+      - label_name: "service"
+        label_path: "ancestor::service/name"
+  - metric_name: "end_time"
+    api_endpoint: api4
+    metric_path: "/serviceStatistics/nodes/node/services/service/endTime"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/ipAddress"
+      - label_name: "service"
+        label_path: "ancestor::service/name"
+  - metric_name: "objects_examined"
+    api_endpoint: api4
+    metric_path: "/serviceStatistics/nodes/node/services/service/objectsExamined"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/ipAddress"
+      - label_name: "service"
+        label_path: "ancestor::service/name"
+  - metric_name: "objects_examined_per_second"
+    api_endpoint: api4
+    metric_path: "/serviceStatistics/nodes/node/services/service/objectsExaminedPerSecond"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/ipAddress"
+      - label_name: "service"
+        label_path: "ancestor::service/name"
+  - metric_name: "objects_serviced"
+    api_endpoint: api4
+    metric_path: "/serviceStatistics/nodes/node/services/service/objectsServiced"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/ipAddress"
+      - label_name: "service"
+        label_path: "ancestor::service/name"
+  - metric_name: "objects_serviced_per_second"
+    api_endpoint: api4
+    metric_path: "/serviceStatistics/nodes/node/services/service/objectsServicedPerSecond"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/ipAddress"
+      - label_name: "service"
+        label_path: "ancestor::service/name"
+  - metric_name: "objects_unable_to_service"
+    api_endpoint: api4
+    metric_path: "/serviceStatistics/nodes/node/services/service/objectsUnableToService"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/ipAddress"
+      - label_name: "service"
+        label_path: "ancestor::service/name"
+  - metric_name: "objects_unable_to_service_per_second"
+    api_endpoint: api4
+    metric_path: "/serviceStatistics/nodes/node/services/service/objectsUnableToServicePerSecond"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/ipAddress"
+      - label_name: "service"
+        label_path: "ancestor::service/name"
