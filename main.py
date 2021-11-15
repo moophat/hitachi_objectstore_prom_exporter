@@ -17,6 +17,7 @@ REGISTRY.unregister(PLATFORM_COLLECTOR)
 REGISTRY.unregister(REGISTRY._names_to_collectors['python_gc_objects_collected_total'])
 CONFIG_FILE = "config.yml"
 LOG_FILE = '/var/log/hitachi_content_platform.log'
+config = {}
 
 
 def extract_number(text):
@@ -48,6 +49,28 @@ def load_config():
     else:
         print("Can not find the file config.yml!")
         exit(0)
+
+def config_logging(log_file):
+    if config['debug']:
+        logging.basicConfig(
+            filename=log_file,
+            filemode='a',
+            format='%(asctime)s   %(levelname)s   %(message)s',
+            level=logging.DEBUG)
+    else:
+        logging.basicConfig(
+            filename=log_file,
+            filemode='a',
+            format='%(asctime)s   %(levelname)s   %(message)s',
+            level=logging.INFO)
+
+
+def check_state(text):
+    state = {"READY": 0, "RUNNING": 1, "DISABLED": 2}
+    if text in state:
+        return state[text]
+    else:
+        return None
 
 
 class HCPCollector(object):
@@ -108,13 +131,19 @@ class HCPCollector(object):
                         for element in metric_config['labels']:
                             label_node = node.xpath(element['label_path'])
                             label_dict[element['label_name']] = label_node[0].text
-                        logging.debug("{} - {}: {}".format(label_dict, tenant, node.text))
+                        logging.debug("metric '{}' label '{}' - {}: {}".format(metric_config['metric_name'], label_dict, tenant, node.text))
                         number = extract_number(node.text)
                         if number is not None:
                             self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant], number)
                         else:
                             # Get non numeric data
-                            pass
+                            check_st = check_state(node.text)
+                            if check_st is not None:
+                                # Hard code for service state
+                                self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant], check_st)
+                            else:
+                                # Does not support the non numeric data
+                                pass
             else:
                 # api does not contain tenant
                 tree = self._metrics_values[metric_config['api_endpoint']]
@@ -124,13 +153,19 @@ class HCPCollector(object):
                     for element in metric_config['labels']:
                         label_node = node.xpath(element['label_path'])
                         label_dict[element['label_name']] = label_node[0].text
-                    logging.debug("{}: {}".format(label_dict, node.text))
+                    logging.debug("metric '{}' label '{}': {}".format(metric_config['metric_name'], label_dict, node.text))
                     number = extract_number(node.text)
                     if number is not None:
                         self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()), number)
                     else:
                         # Get non numeric data
-                        pass
+                        check_st = check_state(node.text)
+                        if check_st is not None:
+                            # Hard code for service state
+                            self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()), check_st)
+                        else:
+                            # Does not support the non numeric data
+                            pass
     
     def collect(self):
         self._setup_empty_prometheus_metrics()
@@ -140,12 +175,18 @@ class HCPCollector(object):
             yield metric
 
 def main():
-    pass
-
-
-if __name__ == "__main__":
+    global config
     config = load_config()
-    start_http_server(8000)
+    if config.get('log_file'):
+        log_file = config['log_file']
+    else:
+        log_file = LOG_FILE
+    config_logging(log_file)
+    start_http_server(int(config.get('port')), config.get('host'))
     REGISTRY.register(HCPCollector(config))
     while True:
         time.sleep(10)
+
+
+if __name__ == "__main__":
+    main()

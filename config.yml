@@ -8,7 +8,7 @@ port: 8000
 host: 0.0.0.0
 
 # Enable debug logging for exporter
-debug: true
+debug: false
 
 # Default: /var/log/hitachi_content_platform.log
 log_file: "/home/kien/hitachi_content_platform.log"
@@ -204,6 +204,14 @@ metrics:
     api_endpoint: api3
     metric_path: "/statistics/storageCapacityUsed"
     labels: []
+  - metric_name: "state"
+    api_endpoint: api4
+    metric_path: "/serviceStatistics/nodes/node/services/service/state"
+    labels:
+      - label_name: "node"
+        label_path: "ancestor::node/ipAddress"
+      - label_name: "service"
+        label_path: "ancestor::service/name"
   - metric_name: "start_time"
     api_endpoint: api4
     metric_path: "/serviceStatistics/nodes/node/services/service/startTime"
