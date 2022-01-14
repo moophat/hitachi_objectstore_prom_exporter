@@ -71,15 +71,17 @@ def main():
                 alert['instance'] = node['node_name']
                 alerts.append({"labels": alert, "annotations": {"summary": "Alert from " + node['node_name']}, "generatorURL": node['more_info']})
         if len(alerts) > 0:
+            print("There are some alerts in S node! Send them to alertmanager")
             try:
                 response = requests.post(config['alert_manager'], json=alerts)
-                print("Send to alertmanager")
+                logging.debug("Send to alertmanager")
                 if response.status_code != 200:
                     logging.error("The request is failed!")
             except Exception as err:
                 logging.error("Can't send the alerts to the alertmanager")
                 logging.exception(err)
         else:
+            print("There is no alert!")
             logging.debug("System has no alert")
         time.sleep(int(config.get('interval')))
 

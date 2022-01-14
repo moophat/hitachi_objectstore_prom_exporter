@@ -11,7 +11,7 @@ host: 0.0.0.0
 debug: false
 
 # Default: /var/log/hitachi_content_platform.log
-log_file: "/home/kien/hitachi_content_platform.log"
+log_file: "/var/log/hitachi_content_platform.log"
 
 # Hitachi Content Platform API destination
 base_url: "https://10.1.22.163:9090"
