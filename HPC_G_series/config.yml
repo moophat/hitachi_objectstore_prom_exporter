@@ -22,6 +22,7 @@ endpoints:
   api2: "/mapi/tenants/<tenant-user>"
   api3: "/mapi/tenants/<tenant-user>/statistics"
   api4: "/mapi/services/statistics"
+  api5: "/mapi/tenants/<tenant-user>/namespaces/<namespace>/statistics"
 
 # Declare the Authorization
 Authorization: "HCP YWRtaW4=:0e7517141fb53f21ee439b355b5a1d0a"
@@ -276,3 +277,47 @@ metrics:
         label_path: "ancestor::node/ipAddress"
       - label_name: "service"
         label_path: "ancestor::service/name"
+  - metric_name: "compressed_count_namespace"
+    api_endpoint: api5
+    metric_path: "/statistics/compressedCount"
+    labels: []
+  - metric_name: "compressed_saved_size_namespace"
+    api_endpoint: api5
+    metric_path: "/statistics/compressedSavedSize"
+    labels: []
+  - metric_name: "custom_metadata_count_namespace"
+    api_endpoint: api5
+    metric_path: "/statistics/customMetadataCount"
+    labels: []
+  - metric_name: "custom_metadata_size_namespace"
+    api_endpoint: api5
+    metric_path: "/statistics/customMetadataSize"
+    labels: []
+  - metric_name: "erasure_coded_count_namespace"
+    api_endpoint: api5
+    metric_path: "/statistics/erasureCodedCount"
+    labels: []
+  - metric_name: "erasure_coded_size_namespace"
+    api_endpoint: api5
+    metric_path: "/statistics/erasureCodedSize"
+    labels: []
+  - metric_name: "ingested_volume_namespace"
+    api_endpoint: api5
+    metric_path: "/statistics/ingestedVolume"
+    labels: []
+  - metric_name: "object_count_namespace"
+    api_endpoint: api5
+    metric_path: "/statistics/objectCount"
+    labels: []
+  - metric_name: "shred_count_namespace"
+    api_endpoint: api5
+    metric_path: "/statistics/shredCount"
+    labels: []
+  - metric_name: "shred_size_namespace"
+    api_endpoint: api5
+    metric_path: "/statistics/shredSize"
+    labels: []
+  - metric_name: "storage_capacity_used_namespace"
+    api_endpoint: api5
+    metric_path: "/statistics/storageCapacityUsed"
+    labels: []

@@ -86,6 +86,8 @@ class HCPCollector(object):
             label_name = [element['label_name'] for element in metric_config['labels']]
             if "<tenant-user>" in self.config['endpoints'][metric_config['api_endpoint']]:
                 label_name.append('tenant')
+            if "<namespace>" in self.config['endpoints'][metric_config['api_endpoint']]:
+                label_name.append('namespace')
             self._prometheus_metrics[metric_config['metric_name']] = GaugeMetricFamily(metric_config['metric_name'], "Hitachi Content Platform {}".format(metric_config['metric_name']), labels=label_name)
     
     def _collect_info_from_urls(self):
@@ -94,6 +96,22 @@ class HCPCollector(object):
             'Authorization': self.config['Authorization'],
             'Accept': 'application/xml'
         }
+        # Get all tenant user and namespaces - Start
+        header_json = {
+            'Authorization': self.config['Authorization'],
+            'Accept': 'application/json'
+        }
+        res = requests.get(url=self.config['base_url'] + "/mapi/tenants", headers=header_json, verify=False)
+        logging.debug("Tenants list: {}".format(res.text))
+        # tenants_dict = json.loads(res.text)['name']
+        tenants_dict = dict()
+        for tenant in json.loads(res.text)['name']:
+            # Get all namespaces belong to tenant - Start
+            res = requests.get(url=self.config['base_url'] + "/mapi/tenants/" + tenant + "/namespaces", headers=header_json, verify=False)
+            logging.debug("namespace list in tenant '{}': '{}'".format(tenant, res.text))
+            tenants_dict[tenant] = json.loads(res.text)['name']
+            # Get all namespaces belong to tenant - End
+        # Get all tenant user and namespaces - End
         for key, value in self.config['endpoints'].items():
             if "<tenant-user>" not in value:
                 logging.debug("Collect the api '{}'".format(self.config['base_url'] + value))
@@ -103,20 +121,24 @@ class HCPCollector(object):
                 self._metrics_values[key] = tree
             else:
                 self._metrics_values[key] = dict()
-                header_json = {
-                    'Authorization': self.config['Authorization'],
-                    'Accept': 'application/json'
-                }
-                res = requests.get(url=self.config['base_url'] + "/mapi/tenants", headers=header_json, verify=False)
-                logging.debug("Tenants list: {}".format(res.text))
-                tenants_list = json.loads(res.text)['name']
-                for tenant in tenants_list:
-                    url_tenant = self.config['base_url'] + value.replace("<tenant-user>", tenant)
-                    logging.debug("Collect the api '{}'".format(url_tenant))
-                    res = requests.get(url=url_tenant, headers=headers, verify=False)
-                    root = etree.fromstring(res.content)
-                    tree = etree.ElementTree(root)
-                    self._metrics_values[key][tenant] = tree
+                if "<namespace>" not in value:
+                    for tenant in tenants_dict:
+                        url_tenant = self.config['base_url'] + value.replace("<tenant-user>", tenant)
+                        logging.debug("Collect the api '{}'".format(url_tenant))
+                        res = requests.get(url=url_tenant, headers=headers, verify=False)
+                        root = etree.fromstring(res.content)
+                        tree = etree.ElementTree(root)
+                        self._metrics_values[key][tenant] = tree
+                else:
+                    for tenant in tenants_dict:
+                        self._metrics_values[key][tenant] = dict()
+                        for namespace in tenants_dict[tenant]:
+                            url_namespace = self.config['base_url'] + value.replace("<tenant-user>", tenant).replace("<namespace>", namespace)
+                            logging.debug("Collect the api '{}'".format(url_namespace))
+                            res = requests.get(url=url_namespace, headers=headers, verify=False)
+                            root = etree.fromstring(res.content)
+                            tree = etree.ElementTree(root)
+                            self._metrics_values[key][tenant][namespace] = tree
     
     def populate_metrics(self):
         logging.info("Populate the metric exporter from http response")
@@ -124,26 +146,51 @@ class HCPCollector(object):
             if isinstance(self._metrics_values[metric_config['api_endpoint']], dict):
                 # api contains tenant
                 for tenant, value in self._metrics_values[metric_config['api_endpoint']].items():
-                    leaf = value.xpath(metric_config['metric_path'])
-                    for i in range(len(leaf)):
-                        label_dict = {}
-                        node = leaf[i]
-                        for element in metric_config['labels']:
-                            label_node = node.xpath(element['label_path'])
-                            label_dict[element['label_name']] = label_node[0].text
-                        logging.debug("metric '{}' label '{}' - {}: {}".format(metric_config['metric_name'], label_dict, tenant, node.text))
-                        number = extract_number(node.text)
-                        if number is not None:
-                            self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant], number)
-                        else:
-                            # Get non numeric data
-                            check_st = check_state(node.text)
-                            if check_st is not None:
-                                # Hard code for service state
-                                self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant], check_st)
+                    if not isinstance(value, dict):
+                        # api does not contain namespace
+                        leaf = value.xpath(metric_config['metric_path'])
+                        for i in range(len(leaf)):
+                            label_dict = {}
+                            node = leaf[i]
+                            for element in metric_config['labels']:
+                                label_node = node.xpath(element['label_path'])
+                                label_dict[element['label_name']] = label_node[0].text
+                            logging.debug("metric '{}' label '{}' - {}: {}".format(metric_config['metric_name'], label_dict, tenant, node.text))
+                            number = extract_number(node.text)
+                            if number is not None:
+                                self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant], number)
                             else:
-                                # Does not support the non numeric data
-                                pass
+                                # Get non numeric data
+                                check_st = check_state(node.text)
+                                if check_st is not None:
+                                    # Hard code for service state
+                                    self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant], check_st)
+                                else:
+                                    # Does not support the non numeric data
+                                    pass
+                    else:
+                        # api contains tenant and namespace
+                        for namespace, nsdata in value.items():
+                            leaf = nsdata.xpath(metric_config['metric_path'])
+                            for i in range(len(leaf)):
+                                label_dict = {}
+                                node = leaf[i]
+                                for element in metric_config['labels']:
+                                    label_node = node.xpath(element['label_path'])
+                                    label_dict[element['label_name']] = label_node[0].text
+                                logging.debug("metric '{}' label '{}' - {} - {}: {}".format(metric_config['metric_name'], label_dict, tenant, namespace, node.text))
+                                number = extract_number(node.text)
+                                if number is not None:
+                                    self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant, namespace], number)
+                                else:
+                                    # Get non numeric data
+                                    check_st = check_state(node.text)
+                                    if check_st is not None:
+                                        # Hard code for service state
+                                        self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant, namespace], check_st)
+                                    else:
+                                        # Does not support the non numeric data
+                                        pass
             else:
                 # api does not contain tenant
                 tree = self._metrics_values[metric_config['api_endpoint']]

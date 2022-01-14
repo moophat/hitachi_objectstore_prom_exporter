@@ -1,0 +1,63 @@
+##########################################
+# Hitachi Content Platform Prometheus exporter for S Node
+##########################################
+# Port run exporter
+port: 8000
+
+# Host run in exporter
+host: 0.0.0.0
+
+# Enable debug logging for exporter
+debug: false
+
+# Default: /var/log/hitachi_S_series.log
+log_file: "/var/log/hitachi_S_series.log"
+
+# List monitoring S nodes
+snodes:
+  - node_name: "node1"
+    base_url: "https://10.1.22.167:9090"
+    Authorization: "Basic YWRtaW46U3RhcnQxMjMh"
+  - node_name: "node2"
+    base_url: "https://10.1.22.167:9090"
+    Authorization: "Basic YWRtaW46U3RhcnQxMjMh"
+
+endpoints:
+  api1: "/mapi/system/status/full"
+  api2: "/mapi/metrics/resourceLoad"
+  api3: "/mapi/metrics/system"
+
+metrics:
+  - metric_name: "totalMemory"
+    api_endpoint: api1
+    metric_path: "systemStatus.hardware.serverModuleInfo[0].coreHardware.totalMemory"
+  - metric_name: "usedMemory"
+    api_endpoint: api1
+    metric_path: "systemStatus.hardware.serverModuleInfo[0].coreHardware.usedMemory"
+  - metric_name: "cpuUsagePercent"
+    api_endpoint: api2
+    metric_path: "cpuUsagePercent"
+  - metric_name: "freeNetworkBandwidth"
+    api_endpoint: api2
+    metric_path: "freeNetworkBandwidth"
+  - metric_name: "totalNetworkBandwidth"
+    api_endpoint: api2
+    metric_path: "totalNetworkBandwidth"
+  - metric_name: "totalBytes"
+    api_endpoint: api3
+    metric_path: "totalBytes"
+  - metric_name: "usedBytes"
+    api_endpoint: api3
+    metric_path: "usedBytes"
+  - metric_name: "freeBytes"
+    api_endpoint: api3
+    metric_path: "freeBytes"
+  - metric_name: "percentUsed"
+    api_endpoint: api3
+    metric_path: "percentUsed"
+  - metric_name: "bucketCount"
+    api_endpoint: api3
+    metric_path: "bucketCount"
+  - metric_name: "objectCount"
+    api_endpoint: api3
+    metric_path: "objectCount"

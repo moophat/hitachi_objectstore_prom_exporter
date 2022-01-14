@@ -1,0 +1,22 @@
+# Default: /var/log/HPC_alerts.log
+log_file: "/var/log/HPC_alerts.log"
+
+# The interval check for the alerts in second, default: 30 seconds
+interval: 30
+
+# Enable debug logging for exporter
+debug: false
+
+# Alertmanager v1 config
+alert_manager: "http://10.98.0.139:9093/api/v1/alerts"
+
+# List monitoring S nodes
+snodes:
+  - node_name: "node1"
+    base_url: "https://10.1.22.167:9090"
+    Authorization: "Basic YWRtaW46U3RhcnQxMjMh"
+    more_info: "https://10.1.22.167:8000/admin/monitor_input.action"
+  - node_name: "node2"
+    base_url: "https://10.1.22.167:9090"
+    Authorization: "Basic YWRtaW46U3RhcnQxMjMh"
+    more_info: "https://10.1.22.167:8000/admin/monitor_input.action"
