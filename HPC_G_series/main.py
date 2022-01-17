@@ -107,9 +107,12 @@ class HCPCollector(object):
         tenants_dict = dict()
         for tenant in json.loads(res.text)['name']:
             # Get all namespaces belong to tenant - Start
-            res = requests.get(url=self.config['base_url'] + "/mapi/tenants/" + tenant + "/namespaces", headers=header_json, verify=False)
-            logging.debug("namespace list in tenant '{}': '{}'".format(tenant, res.text))
-            tenants_dict[tenant] = json.loads(res.text)['name']
+            res1 = requests.get(url=self.config['base_url'] + "/mapi/tenants/" + tenant + "/namespaces", headers=header_json, verify=False)
+            logging.debug("namespace list in tenant '{}': '{}'".format(tenant, res1.text))
+            try:
+                tenants_dict[tenant] = json.loads(res1.text)['name']
+            except:
+                logging.error("Error with tenant {}: output namespace is {}".format(tenant, res1.text))
             # Get all namespaces belong to tenant - End
         # Get all tenant user and namespaces - End
         for key, value in self.config['endpoints'].items():
