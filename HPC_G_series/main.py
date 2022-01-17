@@ -112,6 +112,7 @@ class HCPCollector(object):
             try:
                 tenants_dict[tenant] = json.loads(res1.text)['name']
             except:
+                tenants_dict[tenant] = []
                 logging.error("Error with tenant {}: output namespace is {}".format(tenant, res1.text))
             # Get all namespaces belong to tenant - End
         # Get all tenant user and namespaces - End
