@@ -10,7 +10,7 @@ import urllib3
 from prometheus_client import start_http_server, REGISTRY, PROCESS_COLLECTOR, PLATFORM_COLLECTOR
 import time
 import re
-import jmespath
+import dicttoxml
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 REGISTRY.unregister(PROCESS_COLLECTOR)
@@ -75,7 +75,8 @@ class HCPSnode(object):
         self._prometheus_metrics = {}
         for metric_config in self.config['metrics']:
             logging.debug("Add the metric '{}' to exporter".format(metric_config['metric_name']))
-            label_name = ['node']
+            label_name = [element['label_name'] for element in metric_config['labels']]
+            label_name.append('node')
             self._prometheus_metrics[metric_config['metric_name']] = GaugeMetricFamily(metric_config['metric_name'], "HCP S-node {}".format(metric_config['metric_name']), labels=label_name)
     
     def _collect_info_from_urls(self):
@@ -89,15 +90,28 @@ class HCPSnode(object):
                 }
                 result = requests.get(url=node['base_url'] + value, headers=headers, verify=False)
                 data = json.loads(result.text)
-                self._metrics_values[key][node['node_name']] = data
+                root = etree.fromstring(dicttoxml.dicttoxml(data))
+                tree = etree.ElementTree(root)
+                self._metrics_values[key][node['node_name']] = tree
 
     def populate_metrics(self):
         logging.info("Populate the metric exporter from http response")
         for metric_config in self.config['metrics']:
             for node, data in self._metrics_values[metric_config['api_endpoint']].items():
                 try:
-                    number = jmespath.search(metric_config['metric_path'], data=data)
-                    self._prometheus_metrics[metric_config['metric_name']].add_metric([node], number)
+                    leaf = data.xpath(metric_config['metric_path'])
+                    for i in range(len(leaf)):
+                        label_dict = {}
+                        node_xm = leaf[i]
+                        for element in metric_config['labels']:
+                            label_node = node_xm.xpath(element['label_path'])
+                            label_dict[element['label_name']] = label_node[0].text
+                        logging.debug("metric '{}' label '{}' - {}: {}".format(metric_config['metric_name'], label_dict, node, node_xm.text))
+                        number = extract_number(node_xm.text)
+                        if number is not None:
+                            self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [node], number)
+                        else:
+                            pass
                 except Exception as err:
                     logging.exception(err)
     

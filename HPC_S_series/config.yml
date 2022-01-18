@@ -30,34 +30,49 @@ endpoints:
 metrics:
   - metric_name: "totalMemory"
     api_endpoint: api1
-    metric_path: "systemStatus.hardware.serverModuleInfo[0].coreHardware.totalMemory"
+    metric_path: "/root/systemStatus/hardware/serverModuleInfo/item/coreHardware/totalMemory"
+    labels:
+      - label_name: "id"
+        label_path: "ancestor::item/id"
   - metric_name: "usedMemory"
     api_endpoint: api1
-    metric_path: "systemStatus.hardware.serverModuleInfo[0].coreHardware.usedMemory"
+    metric_path: "/root/systemStatus/hardware/serverModuleInfo/item/coreHardware/usedMemory"
+    labels:
+      - label_name: "id"
+        label_path: "ancestor::item/id"
   - metric_name: "cpuUsagePercent"
     api_endpoint: api2
-    metric_path: "cpuUsagePercent"
+    metric_path: "/root/cpuUsagePercent"
+    labels: []
   - metric_name: "freeNetworkBandwidth"
     api_endpoint: api2
-    metric_path: "freeNetworkBandwidth"
+    metric_path: "/root/freeNetworkBandwidth"
+    labels: []
   - metric_name: "totalNetworkBandwidth"
     api_endpoint: api2
-    metric_path: "totalNetworkBandwidth"
+    metric_path: "/root/totalNetworkBandwidth"
+    labels: []
   - metric_name: "totalBytes"
     api_endpoint: api3
-    metric_path: "totalBytes"
+    metric_path: "/root/totalBytes"
+    labels: []
   - metric_name: "usedBytes"
     api_endpoint: api3
-    metric_path: "usedBytes"
+    metric_path: "/root/usedBytes"
+    labels: []
   - metric_name: "freeBytes"
     api_endpoint: api3
-    metric_path: "freeBytes"
+    metric_path: "/root/freeBytes"
+    labels: []
   - metric_name: "percentUsed"
     api_endpoint: api3
-    metric_path: "percentUsed"
+    metric_path: "/root/percentUsed"
+    labels: []
   - metric_name: "bucketCount"
     api_endpoint: api3
-    metric_path: "bucketCount"
+    metric_path: "/root/bucketCount"
+    labels: []
   - metric_name: "objectCount"
     api_endpoint: api3
-    metric_path: "objectCount"
+    metric_path: "/root/objectCount"
+    labels: []
