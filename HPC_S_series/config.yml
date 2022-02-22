@@ -17,15 +17,32 @@ log_file: "/var/log/hitachi_S_series.log"
 snodes:
   - node_name: "node1"
     base_url: "https://10.1.22.167:9090"
-    Authorization: "Basic YWRtaW46U3RhcnQxMjMh"
+    Authorization: "Basic YWRtaW46QWRtaW5AMTIz"
+    ip: "10.1.22.167"
+    #test: "test2"
   - node_name: "node2"
     base_url: "https://10.1.22.167:9090"
-    Authorization: "Basic YWRtaW46U3RhcnQxMjMh"
+    Authorization: "Basic YWRtaW46QWRtaW5AMTIz"
+    ip: "10.1.22.168"
+    #test: "test3"
 
 endpoints:
   api1: "/mapi/system/status/full"
   api2: "/mapi/metrics/resourceLoad"
   api3: "/mapi/metrics/system"
+ 
+# Alerts configuration
+alert_config:
+  value: "severity" #The attribute use as value to prometheus, others attribute will be used as label
+  mapping_values:
+    severity:
+      "GOOD": 0
+      "WARNING": 1
+      "BAD": 2
+    level:
+      "NORMAL": 0
+      "DEGRADED": 1
+      "CRITICAL": 2
 
 metrics:
   - metric_name: "totalMemory"
