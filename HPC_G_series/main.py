@@ -89,9 +89,15 @@ class HCPCollector(object):
             if "<namespace>" in self.config['endpoints'][metric_config['api_endpoint']]:
                 label_name.append('namespace')
             self._prometheus_metrics[metric_config['metric_name']] = GaugeMetricFamily(metric_config['metric_name'], "Hitachi Content Platform {}".format(metric_config['metric_name']), labels=label_name)
+        self._prometheus_metrics['node_connection'] = GaugeMetricFamily('node_connection', "HCP G-node connection")
     
     def _collect_info_from_urls(self):
+        if 'timeout' in self.config:
+            timeout = float(self.config['timeout'])
+        else:
+            timeout = 3
         logging.info("Collect data from api list")
+        self._metrics_values['node_connection'] = 1
         headers = {
             'Authorization': self.config['Authorization'],
             'Accept': 'application/xml'
@@ -101,51 +107,74 @@ class HCPCollector(object):
             'Authorization': self.config['Authorization'],
             'Accept': 'application/json'
         }
-        res = requests.get(url=self.config['base_url'] + "/mapi/tenants", headers=header_json, verify=False)
-        logging.debug("Tenants list: {}".format(res.text))
-        # tenants_dict = json.loads(res.text)['name']
         tenants_dict = dict()
-        for tenant in json.loads(res.text)['name']:
-            # Get all namespaces belong to tenant - Start
-            res1 = requests.get(url=self.config['base_url'] + "/mapi/tenants/" + tenant + "/namespaces", headers=header_json, verify=False)
-            logging.debug("namespace list in tenant '{}': '{}'".format(tenant, res1.text))
-            try:
-                tenants_dict[tenant] = json.loads(res1.text)['name']
-            except:
-                tenants_dict[tenant] = []
-                logging.error("Error with tenant {}: output namespace is {}".format(tenant, res1.text))
-            # Get all namespaces belong to tenant - End
+        try:
+            res = requests.get(url=self.config['base_url'] + "/mapi/tenants", headers=header_json, verify=False, timeout=timeout)
+            logging.debug("Tenants list: {}".format(res.text))
+            # tenants_dict = json.loads(res.text)['name']
+            for tenant in json.loads(res.text)['name']:
+                # Get all namespaces belong to tenant - Start
+                res1 = requests.get(url=self.config['base_url'] + "/mapi/tenants/" + tenant + "/namespaces", headers=header_json, verify=False, timeout=timeout)
+                logging.debug("namespace list in tenant '{}': '{}'".format(tenant, res1.text))
+                try:
+                    tenants_dict[tenant] = json.loads(res1.text)['name']
+                except:
+                    tenants_dict[tenant] = []
+                    logging.error("Error with tenant {}: output namespace is {}".format(tenant, res1.text))
+                # Get all namespaces belong to tenant - End
+        except Exception as err:
+            logging.error("Error to get tenants list and namespace")
+            logging.exception(err)
+            self._metrics_values['node_connection'] = 0
         # Get all tenant user and namespaces - End
         for key, value in self.config['endpoints'].items():
             if "<tenant-user>" not in value:
                 logging.debug("Collect the api '{}'".format(self.config['base_url'] + value))
-                res = requests.get(url=self.config['base_url'] + value, headers=headers, verify=False)
-                root = etree.fromstring(res.content)
-                tree = etree.ElementTree(root)
-                self._metrics_values[key] = tree
+                try:
+                    res = requests.get(url=self.config['base_url'] + value, headers=headers, verify=False, timeout=timeout)
+                    root = etree.fromstring(res.content)
+                    tree = etree.ElementTree(root)
+                    self._metrics_values[key] = tree
+                except Exception as err:
+                    logging.error("Error to get data from api '{}'".format(self.config['base_url'] + value))
+                    logging.exception(err)
+                    self._metrics_values['node_connection'] = 0
             else:
                 self._metrics_values[key] = dict()
                 if "<namespace>" not in value:
                     for tenant in tenants_dict:
                         url_tenant = self.config['base_url'] + value.replace("<tenant-user>", tenant)
                         logging.debug("Collect the api '{}'".format(url_tenant))
-                        res = requests.get(url=url_tenant, headers=headers, verify=False)
-                        root = etree.fromstring(res.content)
-                        tree = etree.ElementTree(root)
-                        self._metrics_values[key][tenant] = tree
+                        try:
+                            res = requests.get(url=url_tenant, headers=headers, verify=False, timeout=timeout)
+                            root = etree.fromstring(res.content)
+                            tree = etree.ElementTree(root)
+                            self._metrics_values[key][tenant] = tree
+                        except Exception as err:
+                            logging.error("Error to get data from api '{}'".format(url_tenant))
+                            logging.exception(err)
+                            self._metrics_values['node_connection'] = 0
                 else:
                     for tenant in tenants_dict:
                         self._metrics_values[key][tenant] = dict()
                         for namespace in tenants_dict[tenant]:
                             url_namespace = self.config['base_url'] + value.replace("<tenant-user>", tenant).replace("<namespace>", namespace)
                             logging.debug("Collect the api '{}'".format(url_namespace))
-                            res = requests.get(url=url_namespace, headers=headers, verify=False)
-                            root = etree.fromstring(res.content)
-                            tree = etree.ElementTree(root)
-                            self._metrics_values[key][tenant][namespace] = tree
+                            try:
+                                res = requests.get(url=url_namespace, headers=headers, verify=False, timeout=timeout)
+                                root = etree.fromstring(res.content)
+                                tree = etree.ElementTree(root)
+                                self._metrics_values[key][tenant][namespace] = tree
+                            except Exception as err:
+                                logging.error("Error to get data from api '{}'".format(url_namespace))
+                                logging.exception(err)
+                                self._metrics_values['node_connection'] = 0
     
     def populate_metrics(self):
         logging.info("Populate the metric exporter from http response")
+        # Add connection metric
+        self._prometheus_metrics['node_connection'].add_metric([], self._metrics_values['node_connection'])
+        # Add other metrics
         for metric_config in self.config['metrics']:
             if isinstance(self._metrics_values[metric_config['api_endpoint']], dict):
                 # api contains tenant
@@ -221,7 +250,11 @@ class HCPCollector(object):
     def collect(self):
         self._setup_empty_prometheus_metrics()
         self._collect_info_from_urls()
-        self.populate_metrics()
+        try:
+            self.populate_metrics()
+        except Exception as err:
+            logging.error("Error to populate metrics")
+            logging.exception(err)
         for metric in self._prometheus_metrics.values():
             yield metric
 

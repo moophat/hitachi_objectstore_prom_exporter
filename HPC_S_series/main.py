@@ -11,6 +11,7 @@ from prometheus_client import start_http_server, REGISTRY, PROCESS_COLLECTOR, PL
 import time
 import re
 import dicttoxml
+dicttoxml.LOG.setLevel(logging.ERROR)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 REGISTRY.unregister(PROCESS_COLLECTOR)
@@ -97,9 +98,21 @@ class HCPSnode(object):
         self.alert_labels = ['node'] + custom_label + alert_labels
         self.custom_label = custom_label
         self._prometheus_metrics['alert'] = GaugeMetricFamily('alert', "HCP S-node alerts", labels=self.alert_labels)
+        # Add the node_connection metric to exporter
+        self._prometheus_metrics['node_connection'] = GaugeMetricFamily('node_connection', "HCP S-node connection", labels=['node'] + custom_label)
     
     def _collect_info_from_urls(self):
+        if 'timeout' in self.config:
+            timeout = float(self.config['timeout'])
+        else:
+            timeout = 3
         logging.info("Collect data from api list")
+        node_heathy_status = dict()
+        for node in self.config['snodes']:
+            node_heathy_status[node['node_name']] = dict()
+            node_heathy_status[node['node_name']]['connection_status'] = 1
+            for custom_lb in self.custom_label:
+                node_heathy_status[node['node_name']][custom_lb] = node[custom_lb]
         # Other metrics
         for key, value in self.config['endpoints'].items():
             self._metrics_values[key] = dict()
@@ -108,11 +121,16 @@ class HCPSnode(object):
                     'Authorization': node['Authorization'],
                     'X-HCPS-API-VERSION': '3.1.0'
                 }
-                result = requests.get(url=node['base_url'] + value, headers=headers, verify=False)
-                data = json.loads(result.text)
-                root = etree.fromstring(dicttoxml.dicttoxml(data))
-                tree = etree.ElementTree(root)
-                self._metrics_values[key][node['node_name']] = tree
+                try:
+                    result = requests.get(url=node['base_url'] + value, headers=headers, verify=False, timeout=timeout)
+                    data = json.loads(result.text)
+                    root = etree.fromstring(dicttoxml.dicttoxml(data))
+                    tree = etree.ElementTree(root)
+                    self._metrics_values[key][node['node_name']] = tree
+                except Exception as err:
+                    logging.error("Error when collect data from url: {}".format(node['base_url'] + value))
+                    logging.exception(err)
+                    node_heathy_status[node['node_name']]['connection_status'] = 0
         # Collect alerts
         self._metrics_values['alert'] = dict()
         for node in self.config['snodes']:
@@ -120,11 +138,18 @@ class HCPSnode(object):
                     'Authorization': node['Authorization'],
                     'X-HCPS-API-VERSION': '3.1.0'
                 }
-            result = requests.get(url=node['base_url'] + '/mapi/alerts', headers=headers, verify=False)
-            data = json.loads(result.text)
-            for custom_lb in self.custom_label:
-                data[custom_lb] = node[custom_lb]
-            self._metrics_values['alert'][node['node_name']] = data
+            try:
+                result = requests.get(url=node['base_url'] + '/mapi/alerts', headers=headers, verify=False, timeout=timeout)
+                data = json.loads(result.text)
+                for custom_lb in self.custom_label:
+                    data[custom_lb] = node[custom_lb]
+                self._metrics_values['alert'][node['node_name']] = data
+            except Exception as err:
+                logging.error("Error when collect data from url: {}".format(node['base_url'] + '/mapi/alerts'))
+                logging.exception(err)
+                node_heathy_status[node['node_name']]['connection_status'] = 0
+        # add node healthy status to metrics values
+        self._metrics_values['node_connection'] = node_heathy_status
 
     def populate_metrics(self):
         logging.info("Populate the metric exporter from http response")
@@ -153,25 +178,35 @@ class HCPSnode(object):
                 except Exception as err:
                     logging.exception(err)
         # Alert metrics
-        self.alert_labels.remove('node')
+        if 'node' in self.alert_labels:
+            self.alert_labels.remove('node')
         for node, alert in self._metrics_values['alert'].items():
-            if len(alert['alerts']) > 0:
-                # There are alerts
-                for alt in alert['alerts']:
-                    for attribute in self.config['alert_config']['mapping_values']:
-                        alt[attribute] = self.config['alert_config']['mapping_values'][attribute][alt[attribute]]
-                    number = extract_number(alt[self.config['alert_config']['value']])
-                    if number is not None:
-                        label_values = [node]
-                        for label in self.alert_labels:
-                            if label in self.custom_label:
-                                label_values.append(str(alert[label]))
-                            else:
-                                label_values.append(str(alt[label]))
-                        self._prometheus_metrics['alert'].add_metric(label_values, number)
+            if 'alerts' in alert:
+                if len(alert['alerts']) > 0:
+                    # There are alerts
+                    for alt in alert['alerts']:
+                        for attribute in self.config['alert_config']['mapping_values']:
+                            alt[attribute] = self.config['alert_config']['mapping_values'][attribute][alt[attribute]]
+                        number = extract_number(alt[self.config['alert_config']['value']])
+                        if number is not None:
+                            label_values = [node]
+                            for label in self.alert_labels:
+                                if label in self.custom_label:
+                                    label_values.append(str(alert[label]))
+                                else:
+                                    label_values.append(str(alt[label]))
+                            self._prometheus_metrics['alert'].add_metric(label_values, number)
+                else:
+                    # There is no alerts
+                    pass
             else:
-                # There is no alerts
-                pass
+                logging.error("The format of alert data is not correct, the data is: {}".format(alert))
+        # Node connection status
+        for node, status in self._metrics_values['node_connection'].items():
+            label_values = [node]
+            for label in self.custom_label:
+                label_values.append(str(status[label]))
+            self._prometheus_metrics['node_connection'].add_metric(label_values, status['connection_status'])
     
     def collect(self):
         self._setup_empty_prometheus_metrics()

@@ -13,6 +13,9 @@ debug: false
 # Default: /var/log/hitachi_S_series.log
 log_file: "/var/log/hitachi_S_series.log"
 
+# Timeout for the request from exporter to node S
+timeout: 2
+
 # List monitoring S nodes
 snodes:
   - node_name: "node1"
@@ -21,9 +24,9 @@ snodes:
     ip: "10.1.22.167"
     #test: "test2"
   - node_name: "node2"
-    base_url: "https://10.1.22.167:9090"
+    base_url: "https://10.1.22.169:9090"
     Authorization: "Basic YWRtaW46QWRtaW5AMTIz"
-    ip: "10.1.22.168"
+    ip: "10.1.22.169"
     #test: "test3"
 
 endpoints:

@@ -14,7 +14,10 @@ debug: false
 log_file: "/var/log/hitachi_content_platform.log"
 
 # Hitachi Content Platform API destination
-base_url: "https://10.1.22.163:9090"
+base_url: "https://10.1.22.161:9090"
+
+# timeout for request from exporter to node G
+timeout: 2
 
 # Declare the api endpoints need to be access
 endpoints:
