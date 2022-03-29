@@ -35,13 +35,18 @@ def extract_number(text):
 
 
 def convert_hard_quota(text):
-    token = text.split()
-    if len(token) < 2:
+    try:
+        token = text.split()
+        if len(token) < 2:
+            logging.error("Can not convert the hard quota: %s, return -1 as a value error" % text)
+            return -1
+        else:
+            value  = float(token[0].replace(",", "")) * defs[token[1]]
+            return value
+    except Exception as err:
+        logging.error(err)
         logging.error("Can not convert the hard quota: %s, return -1 as a value error" % text)
         return -1
-    else:
-        value  = float(token[0]) * defs[token[1]]
-        return value
 
 
 def load_config():
