@@ -18,6 +18,7 @@ REGISTRY.unregister(REGISTRY._names_to_collectors['python_gc_objects_collected_t
 CONFIG_FILE = "config.yml"
 LOG_FILE = '/var/log/hitachi_content_platform.log'
 config = {}
+defs = {'GB': 1, 'TB': 1024, 'PB': 1024 * 1024}
 
 
 def extract_number(text):
@@ -31,6 +32,16 @@ def extract_number(text):
         else:
             pass
     return result
+
+
+def convert_hard_quota(text):
+    token = text.split()
+    if len(token) < 2:
+        logging.error("Can not convert the hard quota: %s, return -1 as a value error" % text)
+        return -1
+    else:
+        value  = float(token[0]) * defs[token[1]]
+        return value
 
 
 def load_config():
@@ -191,6 +202,10 @@ class HCPCollector(object):
                             logging.debug("metric '{}' label '{}' - {}: {}".format(metric_config['metric_name'], label_dict, tenant, node.text))
                             number = extract_number(node.text)
                             if number is not None:
+                                # Hard code check hard quota - Start
+                                if 'hardQuota' in metric_config['metric_path']:
+                                    number = convert_hard_quota(node.text)
+                                # Hard code check hard quota - End
                                 self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant], number)
                             else:
                                 # Get non numeric data
@@ -214,6 +229,10 @@ class HCPCollector(object):
                                 logging.debug("metric '{}' label '{}' - {} - {}: {}".format(metric_config['metric_name'], label_dict, tenant, namespace, node.text))
                                 number = extract_number(node.text)
                                 if number is not None:
+                                    # Hard code check hard quota - Start
+                                    if 'hardQuota' in metric_config['metric_path']:
+                                        number = convert_hard_quota(node.text)
+                                    # Hard code check hard quota - End
                                     self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant, namespace], number)
                                 else:
                                     # Get non numeric data
@@ -236,6 +255,10 @@ class HCPCollector(object):
                     logging.debug("metric '{}' label '{}': {}".format(metric_config['metric_name'], label_dict, node.text))
                     number = extract_number(node.text)
                     if number is not None:
+                        # Hard code check hard quota - Start
+                        if 'hardQuota' in metric_config['metric_path']:
+                            number = convert_hard_quota(node.text)
+                        # Hard code check hard quota - End
                         self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()), number)
                     else:
                         # Get non numeric data

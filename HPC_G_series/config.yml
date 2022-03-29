@@ -26,6 +26,7 @@ endpoints:
   api3: "/mapi/tenants/<tenant-user>/statistics"
   api4: "/mapi/services/statistics"
   api5: "/mapi/tenants/<tenant-user>/namespaces/<namespace>/statistics"
+  api6: "/mapi/tenants/<tenant-user>/namespaces/<namespace>"
 
 # Declare the Authorization
 Authorization: "HCP YWRtaW4=:0e7517141fb53f21ee439b355b5a1d0a"
@@ -323,4 +324,12 @@ metrics:
   - metric_name: "storage_capacity_used_namespace"
     api_endpoint: api5
     metric_path: "/statistics/storageCapacityUsed"
+    labels: []
+  - metric_name: "hard_quota_namespace"
+    api_endpoint: api6
+    metric_path: "/namespace/hardQuota"
+    labels: []
+  - metric_name: "soft_quota_namespace"
+    api_endpoint: api6
+    metric_path: "/namespace/softQuota"
     labels: []
