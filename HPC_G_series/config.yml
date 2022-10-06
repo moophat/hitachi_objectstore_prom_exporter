@@ -19,6 +19,13 @@ base_url: "https://10.1.22.161:9090"
 # timeout for request from exporter to node G
 timeout: 2
 
+# Custom label: These labels will be added to all metric
+custom_label:
+  - label_name: "system_name"
+    label_value: "SVTECH"
+  - label_name: "system_id"
+    label_value: "HNI"
+
 # Declare the api endpoints need to be access
 endpoints:
   api1: "/mapi/nodes/statistics"
@@ -29,7 +36,7 @@ endpoints:
   api6: "/mapi/tenants/<tenant-user>/namespaces/<namespace>"
 
 # Declare the Authorization
-Authorization: "HCP YWRtaW4=:0e7517141fb53f21ee439b355b5a1d0a"
+Authorization: "HCP YWRtaW4=:d121b51b6cb53b5ee16798f535bd57c0"
 
 # Declare the metrics need to be collect in variable metrics
 metrics:

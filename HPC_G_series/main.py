@@ -92,8 +92,13 @@ def check_state(text):
 class HCPCollector(object):
 
     def __init__(self, config):
-       self.config = config
-       self._metrics_values = {}
+        self.config = config
+        self._metrics_values = {}
+        self.custom_labels = {}
+        if 'custom_label' in config:
+            for custom_label in config['custom_label']:
+                self.custom_labels[custom_label['label_name']] = custom_label['label_value']
+            
     
     def _setup_empty_prometheus_metrics(self):
         self._prometheus_metrics = {}
@@ -104,8 +109,9 @@ class HCPCollector(object):
                 label_name.append('tenant')
             if "<namespace>" in self.config['endpoints'][metric_config['api_endpoint']]:
                 label_name.append('namespace')
+            label_name += list(self.custom_labels.keys())
             self._prometheus_metrics[metric_config['metric_name']] = GaugeMetricFamily(metric_config['metric_name'], "Hitachi Content Platform {}".format(metric_config['metric_name']), labels=label_name)
-        self._prometheus_metrics['node_connection'] = GaugeMetricFamily('node_connection', "HCP G-node connection")
+        self._prometheus_metrics['node_connection'] = GaugeMetricFamily('node_connection', "HCP G-node connection", labels=list(self.custom_labels.keys()))
     
     def _collect_info_from_urls(self):
         if 'timeout' in self.config:
@@ -189,7 +195,7 @@ class HCPCollector(object):
     def populate_metrics(self):
         logging.info("Populate the metric exporter from http response")
         # Add connection metric
-        self._prometheus_metrics['node_connection'].add_metric([], self._metrics_values['node_connection'])
+        self._prometheus_metrics['node_connection'].add_metric([] + list(self.custom_labels.values()), self._metrics_values['node_connection'])
         # Add other metrics
         for metric_config in self.config['metrics']:
             if isinstance(self._metrics_values[metric_config['api_endpoint']], dict):
@@ -211,13 +217,13 @@ class HCPCollector(object):
                                 if 'hardQuota' in metric_config['metric_path']:
                                     number = convert_hard_quota(node.text)
                                 # Hard code check hard quota - End
-                                self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant], number)
+                                self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant] + list(self.custom_labels.values()), number)
                             else:
                                 # Get non numeric data
                                 check_st = check_state(node.text)
                                 if check_st is not None:
                                     # Hard code for service state
-                                    self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant], check_st)
+                                    self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant] + list(self.custom_labels.values()), check_st)
                                 else:
                                     # Does not support the non numeric data
                                     pass
@@ -238,13 +244,13 @@ class HCPCollector(object):
                                     if 'hardQuota' in metric_config['metric_path']:
                                         number = convert_hard_quota(node.text)
                                     # Hard code check hard quota - End
-                                    self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant, namespace], number)
+                                    self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant, namespace] + list(self.custom_labels.values()), number)
                                 else:
                                     # Get non numeric data
                                     check_st = check_state(node.text)
                                     if check_st is not None:
                                         # Hard code for service state
-                                        self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant, namespace], check_st)
+                                        self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + [tenant, namespace] + list(self.custom_labels.values()), check_st)
                                     else:
                                         # Does not support the non numeric data
                                         pass
@@ -264,13 +270,13 @@ class HCPCollector(object):
                         if 'hardQuota' in metric_config['metric_path']:
                             number = convert_hard_quota(node.text)
                         # Hard code check hard quota - End
-                        self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()), number)
+                        self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + list(self.custom_labels.values()), number)
                     else:
                         # Get non numeric data
                         check_st = check_state(node.text)
                         if check_st is not None:
                             # Hard code for service state
-                            self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()), check_st)
+                            self._prometheus_metrics[metric_config['metric_name']].add_metric(list(label_dict.values()) + list(self.custom_labels.values()), check_st)
                         else:
                             # Does not support the non numeric data
                             pass
