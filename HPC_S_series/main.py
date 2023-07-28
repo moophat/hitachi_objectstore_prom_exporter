@@ -124,6 +124,11 @@ class HCPSnode(object):
                 try:
                     result = requests.get(url=node['base_url'] + value, headers=headers, verify=False, timeout=timeout)
                     data = json.loads(result.text)
+                    # Fake data - Start
+                    if key == "api4":
+                        with open('/home/kien/Downloads/output_hcp_S31.txt', 'r') as f:
+                            data = json.load(f)
+                    # Fake data - End
                     root = etree.fromstring(dicttoxml.dicttoxml(data))
                     tree = etree.ElementTree(root)
                     self._metrics_values[key][node['node_name']] = tree
@@ -165,7 +170,16 @@ class HCPSnode(object):
                             label_node = node_xm.xpath(element['label_path'])
                             label_dict[element['label_name']] = label_node[0].text
                         logging.debug("metric '{}' label '{}' - {}: {}".format(metric_config['metric_name'], label_dict, node, node_xm.text))
-                        number = extract_number(node_xm.text)
+                        # [KienNT] - 27/07/2023 - Update logic to mapping value - Start
+                        if "mapping" in metric_config:
+                            # print(node_xm.text)
+                            try:
+                                number = metric_config["mapping"][node_xm.text]
+                            except:
+                                number = None
+                        else:
+                            number = extract_number(node_xm.text)
+                        # [KienNT] - 27/07/2023 - Update logic to mapping value - End
                         if number is not None:
                             label_values = [node]
                             for node_obj in self.config['snodes']:

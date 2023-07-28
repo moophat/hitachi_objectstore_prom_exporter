@@ -19,20 +19,16 @@ timeout: 2
 # List monitoring S nodes
 snodes:
   - node_name: "node1"
-    base_url: "https://10.1.22.167:9090"
+    base_url: "https://10.1.32.13:9090"
     Authorization: "Basic YWRtaW46QWRtaW5AMTIz"
-    ip: "10.1.22.167"
+    ip: "10.1.32.13"
     #test: "test2"
-  - node_name: "node2"
-    base_url: "https://10.1.22.169:9090"
-    Authorization: "Basic YWRtaW46QWRtaW5AMTIz"
-    ip: "10.1.22.169"
-    #test: "test3"
 
 endpoints:
   api1: "/mapi/system/status/full"
   api2: "/mapi/metrics/resourceLoad"
   api3: "/mapi/metrics/system"
+  api4: "/mapi/hardware"
  
 # Alerts configuration
 alert_config:
@@ -96,3 +92,870 @@ metrics:
     api_endpoint: api3
     metric_path: "/root/objectCount"
     labels: []
+  - metric_name: "actualFanSpeed"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/fans/item/actualFanSpeed"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "fanID"
+        label_path: "parent::item/id"
+  - metric_name: "actualSpeedCode"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/fans/item/actualSpeedCode"
+    mapping:
+      "STOPPED 0": 0
+      "LOWEST 1": 1
+      "LOWEST_2ND 2": 2
+      "LOWEST_3RD 3": 3
+      "INTERMEDIATE 4": 4
+      "HIGHEST_3RD 5": 5
+      "HIGHEST_2ND 6": 6
+      "HIGHEST 7": 7
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "fanID"
+        label_path: "parent::item/id"
+  - metric_name: "codeFan"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/fans/item/code"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "fanID"
+        label_path: "parent::item/id"
+  - metric_name: "errorFan"
+    api_endpoint: api4
+    mapping:
+      "False": 0
+      "True": 1
+    metric_path: "/root/enclosureInfo/item/fans/item/error"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "fanID"
+        label_path: "parent::item/id"
+  - metric_name: "failFan"
+    api_endpoint: api4
+    mapping:
+      "False": 0
+      "True": 1
+    metric_path: "/root/enclosureInfo/item/fans/item/fail"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "fanID"
+        label_path: "parent::item/id"
+  - metric_name: "offFan"
+    api_endpoint: api4
+    mapping:
+      "False": 0
+      "True": 1
+    metric_path: "/root/enclosureInfo/item/fans/item/off"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "fanID"
+        label_path: "parent::item/id"
+  - metric_name: "warningFan"
+    api_endpoint: api4
+    mapping:
+      "False": 0
+      "True": 1
+    metric_path: "/root/enclosureInfo/item/fans/item/warning"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "fanID"
+        label_path: "parent::item/id"
+  - metric_name: "errorDrive"
+    api_endpoint: api4
+    mapping:
+      "False": 0
+      "True": 1
+    metric_path: "/root/enclosureInfo/item/slots/item/drive/error"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "slot"
+        label_path: "ancestor::item/location"
+  - metric_name: "errorsDetected"
+    api_endpoint: api4
+    mapping:
+      "False": 0
+      "True": 1
+    metric_path: "/root/enclosureInfo/item/slots/item/drive/errorsDetected"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "slot"
+        label_path: "ancestor::item/location"
+  - metric_name: "failCode"
+    api_endpoint: api4
+    mapping:
+      "ADD_FAIL": 0
+      "DRIVE_CORRUPT": 1
+      "FORMAT_FAIL": 2
+      "MAINT_CANCEL": 3
+      "MAINT_FAIL": 4
+      "MAINT_NOT_ACTIVE": 5
+      "MIRROR_FAULT": 6
+      "MIRROR_LAST": 7
+      "MIRROR_SPARE": 8
+      "MISSING": 9
+      "MOVED": 10
+      "NONE": 11
+      "REMOVE_FAIL": 12
+      "SERIAL_MISMATCH": 13
+      "WWID_MISMATCH": 14
+    metric_path: "/root/enclosureInfo/item/slots/item/drive/failCode"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "slot"
+        label_path: "ancestor::item/location"
+  - metric_name: "state1"
+    api_endpoint: api4
+    mapping:
+      "ADD": 1
+      "ADDED": 2
+      "ADDING": 3
+      "DISCOVERED": 4
+      "FAIL": 5
+      "FAILED": 6
+      "FORMAT": 7
+      "MIRROR": 8
+      "MIRRORED": 9
+      "MISSING": 10
+      "NONE": 11
+      "PARTITION": 12
+      "REMOVE": 13
+      "REMOVED": 14
+      "REMOVING": 15
+    metric_path: "/root/enclosureInfo/item/slots/item/drive/state1"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "slot"
+        label_path: "ancestor::item/location"
+  - metric_name: "codeCurrents"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/currents/item/code"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "currentID"
+        label_path: "parent::item/id"
+  - metric_name: "critOverCurrents"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/currents/item/critOver"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "currentID"
+        label_path: "parent::item/id"
+  - metric_name: "errorCurrents"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/currents/item/error"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "currentID"
+        label_path: "parent::item/id"
+  - metric_name: "failCurrents"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/currents/item/fail"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "currentID"
+        label_path: "parent::item/id"
+  - metric_name: "warningCurrents"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/currents/item/warning"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "currentID"
+        label_path: "parent::item/id"
+  - metric_name: "warnOverCurrents"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/currents/item/warnOver"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "currentID"
+        label_path: "parent::item/id"
+  - metric_name: "codeDoors"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/doors/item/code"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "doorID"
+        label_path: "parent::item/id"
+  - metric_name: "errorDoors"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/doors/item/error"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "doorID"
+        label_path: "parent::item/id"
+  - metric_name: "openDoors"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/doors/item/open"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "doorID"
+        label_path: "parent::item/id"
+  - metric_name: "warningDoors"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/doors/item/warning"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "doorID"
+        label_path: "parent::item/id"
+  - metric_name: "acFail"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/powerSupplies/item/acFail"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "PowerID"
+        label_path: "parent::item/location"
+  - metric_name: "codePowerSupplies"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/powerSupplies/item/code"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "PowerID"
+        label_path: "parent::item/location"
+  - metric_name: "dcFail"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/powerSupplies/item/dcFail"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "PowerID"
+        label_path: "parent::item/location"
+  - metric_name: "dcOverCurrent"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/powerSupplies/item/dcOverCurrent"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "PowerID"
+        label_path: "parent::item/location"
+  - metric_name: "dcOverVoltage"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/powerSupplies/item/dcOverVoltage"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "PowerID"
+        label_path: "parent::item/location"
+  - metric_name: "dcUnderVoltage"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/powerSupplies/item/dcUnderVoltage"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "PowerID"
+        label_path: "parent::item/location"
+  - metric_name: "errorPowerSupplies"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/powerSupplies/item/error"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "PowerID"
+        label_path: "parent::item/location"
+  - metric_name: "failPowerSupplies"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/powerSupplies/item/fail"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "PowerID"
+        label_path: "parent::item/location"
+  - metric_name: "overTempWarn"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/powerSupplies/item/overTempWarn"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "PowerID"
+        label_path: "parent::item/location"
+  - metric_name: "warningPowerSupplies"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/powerSupplies/item/warning"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "PowerID"
+        label_path: "parent::item/location"
+  - metric_name: "codeSasConnectors"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sasConnectors/item/code"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "errorSasConnectors"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sasConnectors/item/error"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "failSasConnectors"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sasConnectors/item/fail"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "warningSasConnectors"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sasConnectors/item/warning"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "codeSasExpanders"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sasExpanders/item/code"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "sasExpandersID"
+        label_path: "parent::item/location"
+  - metric_name: "errorSasExpanders"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sasExpanders/item/error"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "sasExpandersID"
+        label_path: "parent::item/id"
+  - metric_name: "failSasExpanders"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sasExpanders/item/fail"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "sasExpandersID"
+        label_path: "parent::item/id"
+  - metric_name: "warningSasExpanders"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sasExpanders/item/warning"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "sasExpandersID"
+        label_path: "parent::item/id"
+  - metric_name: "codeEnclosureServices"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/enclosureServices/item/code"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "errorEnclosureServices"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/enclosureServices/item/error"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "failEnclosureServices"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/enclosureServices/item/fail"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "warningEnclosureServices"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/enclosureServices/item/warning"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "cableFault"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sideplanes/item/cableFault"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "sideplanesID"
+        label_path: "parent::item/id"
+  - metric_name: "codeSideplanes"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sideplanes/item/code"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "sideplanesID"
+        label_path: "parent::item/id"
+  - metric_name: "errorSideplanes"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sideplanes/item/error"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "sideplanesID"
+        label_path: "parent::item/id"
+  - metric_name: "faultSideplanes"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sideplanes/item/fault"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "sideplanesID"
+        label_path: "parent::item/id"
+  - metric_name: "poweredSideplanes"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sideplanes/item/powered"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "sideplanesID"
+        label_path: "parent::item/id"
+  - metric_name: "warningSideplanes"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/sideplanes/item/warning"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "sideplanesID"
+        label_path: "parent::item/id"
+  - metric_name: "codeSlots"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/slots/item/code"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "errorSlots"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/slots/item/error"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "failSlots"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/slots/item/fail"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "statusSlots"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/slots/item/status"
+    mapping:
+      "AVAILABLE": 0
+      "FAILED": 1
+      "NONE": 2
+      "UNAVAILABLE": 3
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "warningSlots"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/slots/item/warning"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "codeTemperatures"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/temperatures/item/code"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "critOverTemperatures"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/temperatures/item/critOver"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "critUnderTemperatures"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/temperatures/item/critUnder"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "errorTemperatures"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/temperatures/item/error"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "failTemperatures"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/temperatures/item/fail"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "warningTemperatures"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/temperatures/item/warning"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "warnOverTemperatures"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/temperatures/item/warnOver"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "warnUnderTemperatures"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/temperatures/item/warnUnder"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "codeVoltages"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/voltages/item/code"
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "critOverVoltages"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/voltages/item/critOver"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "critUnderVoltages"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/voltages/item/critUnder"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "errorVoltages"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/voltages/item/error"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "failVoltages"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/voltages/item/fail"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "warningVoltages"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/voltages/item/warning"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "warnOverVoltages"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/voltages/item/warnOver"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "warnUnderVoltages"
+    api_endpoint: api4
+    metric_path: "/root/enclosureInfo/item/voltages/item/warnUnder"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::enclosureInfo/item/id"
+      - label_name: "SasConnectorID"
+        label_path: "parent::item/location"
+  - metric_name: "errorBondInterface"
+    api_endpoint: api4
+    metric_path: "/root/serverModuleInfo/item/networkInterfaces/item/bond/error"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::serverModuleInfo/item/id"
+      - label_name: "bondName"
+        label_path: "parent::item/name"
+  - metric_name: "okBondInterface"
+    api_endpoint: api4
+    metric_path: "/root/serverModuleInfo/item/networkInterfaces/item/bond/ok"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::serverModuleInfo/item/id"
+      - label_name: "bondName"
+        label_path: "parent::item/name"
+  - metric_name: "warningBondInterface"
+    api_endpoint: api4
+    metric_path: "/root/serverModuleInfo/item/networkInterfaces/item/bond/warning"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::serverModuleInfo/item/id"
+      - label_name: "bondName"
+        label_path: "parent::item/name"
+  - metric_name: "errorCoreHardware"
+    api_endpoint: api4
+    metric_path: "/root/serverModuleInfo/item/coreHardware/error"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::serverModuleInfo/item/id"
+      - label_name: "hardware"
+        label_path: "parent::coreHardware/pCode"
+  - metric_name: "loadAvgErrorCoreHardware"
+    api_endpoint: api4
+    metric_path: "/root/serverModuleInfo/item/coreHardware/loadAvgError"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::serverModuleInfo/item/id"
+      - label_name: "hardware"
+        label_path: "parent::coreHardware/pCode"
+  - metric_name: "swapErrorCoreHardware"
+    api_endpoint: api4
+    metric_path: "/root/serverModuleInfo/item/coreHardware/swapError"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::serverModuleInfo/item/id"
+      - label_name: "hardware"
+        label_path: "parent::coreHardware/pCode"
+  - metric_name: "errorServerModuleDisk"
+    api_endpoint: api4
+    metric_path: "/root/serverModuleInfo/item/disks/item/error"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::serverModuleInfo/item/id"
+      - label_name: "hardware"
+        label_path: "parent::item/id"
+  - metric_name: "operatingSystemServerModuleDisk"
+    api_endpoint: api4
+    metric_path: "/root/serverModuleInfo/item/disks/item/operatingSystem"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::serverModuleInfo/item/id"
+      - label_name: "hardware"
+        label_path: "parent::item/id"
+  - metric_name: "warningSystemServerModuleDisk"
+    api_endpoint: api4
+    metric_path: "/root/serverModuleInfo/item/disks/item/warning"
+    mapping:
+      "False": 0
+      "True": 1
+    labels:
+      - label_name: "enclosureID"
+        label_path: "ancestor::serverModuleInfo/item/id"
+      - label_name: "hardware"
+        label_path: "parent::item/id"
