@@ -126,7 +126,7 @@ class HCPSnode(object):
                     data = json.loads(result.text)
                     # Fake data - Start
                     if key == "api4":
-                        with open('/home/kien/Downloads/output_hcp_S31.txt', 'r') as f:
+                        with open('/home/kien/SVTECH/hitachi_prometheus_exporter/HPC_S_series/output_hcp_S31.txt', 'r') as f:
                             data = json.load(f)
                     # Fake data - End
                     root = etree.fromstring(dicttoxml.dicttoxml(data))
@@ -168,7 +168,10 @@ class HCPSnode(object):
                         node_xm = leaf[i]
                         for element in metric_config['labels']:
                             label_node = node_xm.xpath(element['label_path'])
-                            label_dict[element['label_name']] = label_node[0].text
+                            if label_node[0].text:
+                                label_dict[element['label_name']] = label_node[0].text
+                            else:
+                                label_dict[element['label_name']] = 'n/a'
                         logging.debug("metric '{}' label '{}' - {}: {}".format(metric_config['metric_name'], label_dict, node, node_xm.text))
                         # [KienNT] - 27/07/2023 - Update logic to mapping value - Start
                         if "mapping" in metric_config:
