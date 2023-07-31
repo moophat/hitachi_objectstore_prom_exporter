@@ -125,9 +125,9 @@ class HCPSnode(object):
                     result = requests.get(url=node['base_url'] + value, headers=headers, verify=False, timeout=timeout)
                     data = json.loads(result.text)
                     # Fake data - Start
-                    if key == "api4":
-                        with open('/home/kien/SVTECH/hitachi_prometheus_exporter/HPC_S_series/output_hcp_S31.txt', 'r') as f:
-                            data = json.load(f)
+                    # if key == "api4":
+                    #     with open('/home/kien/Downloads/output_hcp_S31.txt', 'r') as f:
+                    #         data = json.load(f)
                     # Fake data - End
                     root = etree.fromstring(dicttoxml.dicttoxml(data))
                     tree = etree.ElementTree(root)
